@@ -72,7 +72,15 @@ async function lookupUser() {
 
   try {
     const res = await fetch(`/api/user/${rawId}`);
-    const data = await res.json();
+
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      showError(`Error ${res.status}: Response was not valid JSON. Check your DISCORD_TOKEN env variable is set in Vercel.`);
+      showLoading(false);
+      return;
+    }
 
     if (!res.ok) {
       const msg = data?.message || data?.error || 'User not found.';
@@ -83,7 +91,7 @@ async function lookupUser() {
 
     renderProfile(data);
   } catch (err) {
-    showError('Network error. Make sure the API is configured.');
+    showError(`Request failed: ${err.message}. Check the browser console (F12) for details.`);
   }
 
   showLoading(false);
